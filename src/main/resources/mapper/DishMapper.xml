@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.DishMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Dish">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="description" column="description" />
+        <result property="price" column="price" />
+        <result property="image" column="image" />
+        <result property="status" column="status" />
+        <result property="sales" column="sales" />
+        <result property="categoryId" column="category_id" />
+        <result property="merchantId" column="merchant_id" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <!-- 新增菜品（返回自增 id） -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.Dish" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dish (
+            name, description, price, image, status, sales, category_id, merchant_id, create_time, update_time
+        ) VALUES (
+                     #{name}, #{description}, #{price}, #{image}, #{status}, #{sales},
+                     #{categoryId}, #{merchantId}, #{createTime}, #{updateTime}
+                 )
+    </insert>
+
+    <!-- 新增菜品（可选字段版） -->
+    <insert id="insertSelective" parameterType="com.example.takeouttry.entity.Dish" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dish
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="description != null">description,</if>
+            <if test="price != null">price,</if>
+            <if test="image != null">image,</if>
+            <if test="status != null">status,</if>
+            <if test="sales != null">sales,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="merchantId != null">merchant_id,</if>
+            create_time,
+            update_time
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="description != null">#{description},</if>
+            <if test="price != null">#{price},</if>
+            <if test="image != null">#{image},</if>
+            <if test="status != null">#{status},</if>
+            <if test="sales != null">#{sales},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="merchantId != null">#{merchantId},</if>
+            #{createTime},
+            #{updateTime}
+        </trim>
+    </insert>
+
+    <!-- 根据主键查询 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM dish WHERE id = #{id}
+    </select>
+
+    <!-- 根据商家ID查询所有菜品（按创建时间降序） -->
+    <select id="listByMerchantId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM dish
+        WHERE merchant_id = #{merchantId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询当前商家的菜品 + 名称模糊搜索 -->
+    <select id="listByMerchantIdWithPage" resultMap="BaseResultMap">
+        SELECT * FROM dish
+        WHERE merchant_id = #{merchantId}
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByMerchantIdAndName" resultType="long">
+        SELECT COUNT(*) FROM dish
+        WHERE merchant_id = #{merchantId}
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+    </select>
+
+    <!-- 根据商家ID和菜品名称（忽略大小写）查询是否存在 -->
+    <select id="findByMerchantIdAndName" resultMap="BaseResultMap">
+        SELECT * FROM dish
+        WHERE merchant_id = #{merchantId}
+          AND LOWER(TRIM(name)) = LOWER(TRIM(#{name}))
+        LIMIT 1
+    </select>
+
+    <select id="countByCategoryId" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM dish WHERE category_id = #{categoryId}
+    </select>
+
+
+    <select id="selectByMerchantIdAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM dish
+        WHERE merchant_id = #{merchantId}
+        AND status = #{status}
+        ORDER BY id DESC   <!-- 或按 sort 字段，如果有 -->
+    </select>
+
+    <select id="selectByMerchantIdAndCategoryIdAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM dish
+        WHERE merchant_id = #{merchantId}
+          AND category_id = #{categoryId}
+          AND status = #{status}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据主键更新（全字段） -->
+    <update id="updateByPrimaryKey" parameterType="com.example.takeouttry.entity.Dish">
+        UPDATE dish
+        SET name = #{name},
+            description = #{description},
+            price = #{price},
+            image = #{image},
+            status = #{status},
+            sales = #{sales},
+            category_id = #{categoryId},
+            merchant_id = #{merchantId},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据主键更新（动态，可选字段） -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.takeouttry.entity.Dish">
+        UPDATE dish
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sales != null">sales = #{sales},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="merchantId != null">merchant_id = #{merchantId},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据主键删除 -->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM dish WHERE id = #{id}
+    </delete>
+
+
+    <!-- 查询商家推荐菜品（上架的，按销量降序，最多 limit 条） -->
+    <select id="selectRecommendDishesByMerchantId" resultType="com.example.takeouttry.entity.Dish">
+        SELECT id, name, description, price, image, sales, category_id, merchant_id,
+               status, create_time, update_time
+        FROM dish
+        WHERE merchant_id = #{merchantId}
+          AND status = 1
+        ORDER BY sales DESC, create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

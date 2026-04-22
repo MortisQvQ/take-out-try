@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.CartMapper">
+
+    <!-- 基础 ResultMap -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Cart">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="merchantId" column="merchant_id" />
+        <result property="dishId" column="dish_id" />
+        <result property="quantity" column="quantity" />
+        <result property="selected" column="selected" />
+        <result property="unitPrice" column="unit_price" />
+        <result property="dishName" column="dish_name" />
+        <result property="dishImage" column="dish_image" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <!-- 新增一条购物车记录 -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.Cart"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO cart
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_id,
+            merchant_id,
+            dish_id,
+            quantity,
+            selected,
+            unit_price,
+            <if test="dishName != null">dish_name,</if>
+            <if test="dishImage != null">dish_image,</if>
+            create_time,
+            update_time
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{merchantId},
+            #{dishId},
+            #{quantity},
+            #{selected},
+            #{unitPrice},
+            <if test="dishName != null">#{dishName},</if>
+            <if test="dishImage != null">#{dishImage},</if>
+            NOW(),
+            NOW()
+        </trim>
+    </insert>
+
+    <!-- 更新购物车记录（主要改数量、选中状态） -->
+    <update id="updateById" parameterType="com.example.takeouttry.entity.Cart">
+        UPDATE cart
+        <set>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="selected != null">selected = #{selected},</if>
+            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+            <if test="dishName != null">dish_name = #{dishName},</if>
+            <if test="dishImage != null">dish_image = #{dishImage},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除单条 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM cart WHERE id = #{id}
+    </delete>
+
+    <!-- 清空用户全部购物车 -->
+    <delete id="deleteByUserId" parameterType="java.lang.Long">
+        DELETE FROM cart WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 清空用户在某商家的购物车 -->
+    <delete id="deleteByUserIdAndMerchantId">
+        DELETE FROM cart
+        WHERE user_id = #{userId} AND merchant_id = #{merchantId}
+    </delete>
+
+    <!-- 查询单条（按 id） -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM cart WHERE id = #{id}
+    </select>
+
+    <!-- 查询用户所有购物车记录（按商家 + 时间排序） -->
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM cart
+        WHERE user_id = #{userId}
+        ORDER BY merchant_id, create_time DESC
+    </select>
+
+    <!-- 查询是否存在（用户+商家+菜品） -->
+    <select id="selectByUserMerchantDish" resultMap="BaseResultMap">
+        SELECT * FROM cart
+        WHERE user_id = #{userId}
+          AND merchant_id = #{merchantId}
+          AND dish_id = #{dishId}
+        LIMIT 1
+    </select>
+
+    <!-- 存在性计数（>0 即存在） -->
+    <select id="existsByUserMerchantDish" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM cart
+        WHERE user_id = #{userId}
+          AND merchant_id = #{merchantId}
+          AND dish_id = #{dishId}
+    </select>
+
+    <!-- 批量设置某商家选中状态 -->
+    <update id="updateSelectedByUserAndMerchant">
+        UPDATE cart
+        SET selected = #{selected},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND merchant_id = #{merchantId}
+    </update>
+
+    <!-- 用户选中商品的总数量（用于购物车角标） -->
+    <select id="countSelectedByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(quantity), 0)
+        FROM cart
+        WHERE user_id = #{userId} AND selected = 1
+    </select>
+
+    <!-- 查询当前用户选中的购物车项（用于下单） -->
+    <select id="selectByUserIdAndSelected" resultMap="BaseResultMap">
+        SELECT *
+        FROM cart
+        WHERE user_id = #{userId}
+          AND selected = #{selected}
+        ORDER BY merchant_id, create_time DESC
+    </select>
+
+
+
+    <!-- 删除当前用户选中的购物车项（下单成功后清理已结算的商品） -->
+    <delete id="deleteByUserIdAndSelected">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+          AND selected = #{selected}
+    </delete>
+
+    <!-- 新增：查询用户 + 商家 + 选中状态的购物车项（用于结算特定商家） -->
+    <select id="selectByUserIdAndMerchantAndSelected" resultMap="BaseResultMap">
+        SELECT *
+        FROM cart
+        WHERE user_id = #{userId}
+          AND merchant_id = #{merchantId}
+          AND selected = #{selected}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 新增：删除用户 + 商家 + 选中状态的购物车项（结算后清理特定商家） -->
+    <delete id="deleteByUserIdAndMerchantAndSelected">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+          AND merchant_id = #{merchantId}
+          AND selected = #{selected}
+    </delete>
+
+
+
+</mapper>

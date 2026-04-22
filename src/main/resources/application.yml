@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: take-out-try
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/takeout_try?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&useUnicode=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  error:
+    include-stacktrace: never
+
+logging:
+  level:
+    com.example.takeouttry.mapper: DEBUG
+
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+
+jwt:
+  secret: your-super-secret-key-at-least-32-chars-2026
+  expiration: 604800000
+  #expiration: 60000

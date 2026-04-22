@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.OrdersMapper">
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Orders">
+        <id property="id" column="id" />
+        <result property="orderNo" column="order_no" />
+        <result property="userId" column="user_id" />
+        <result property="merchantId" column="merchant_id" />
+        <result property="addressId" column="address_id" />
+        <result property="totalAmount" column="total_amount" />
+        <result property="status" column="status" />
+        <result property="payTime" column="pay_time" />
+        <result property="remark" column="remark" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <!-- 新增订单 -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.Orders" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (
+            order_no, user_id, merchant_id, address_id, total_amount, status,
+            pay_time, remark, create_time, update_time
+        ) VALUES (
+                     #{orderNo}, #{userId}, #{merchantId}, #{addressId}, #{totalAmount}, #{status},
+                     #{payTime}, #{remark}, #{createTime}, #{updateTime}
+                 )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <!-- 根据订单编号查询（唯一） -->
+    <select id="selectByOrderNo" parameterType="string" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 根据用户ID查询最新一条（示例，可改成返回List） -->
+    <select id="selectByUserId" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 更新订单（动态SQL，防止空值覆盖） -->
+    <update id="updateById" parameterType="com.example.takeouttry.entity.Orders">
+        UPDATE orders
+        <set>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="merchantId != null">merchant_id = #{merchantId},</if>
+            <if test="addressId != null">address_id = #{addressId},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM orders WHERE id = #{id}
+    </delete>
+
+    <!--
+      查询商家指定状态的订单列表（带分页）
+      用于：商家端订单列表分页查询
+  -->
+    <select id="listMerchantOrdersWithPage" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE merchant_id = #{merchantId}
+        <if test="statusList != null and statusList.size() > 0">
+            AND status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!--
+        统计商家指定状态的订单总数
+        用于：计算分页总页数和前端是否还有更多数据
+    -->
+    <select id="countMerchantOrders" resultType="long">
+        SELECT COUNT(*) FROM orders
+        WHERE merchant_id = #{merchantId}
+        <if test="statusList != null and statusList.size() > 0">
+            AND status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- ==================== 统计相关 ==================== -->
+
+    <!--
+        按状态统计指定商家的订单数量
+        用于：商家端首页各状态订单计数
+    -->
+    <select id="countByMerchantAndStatus" resultType="int">
+        SELECT COUNT(*) FROM orders
+        WHERE merchant_id = #{merchantId}
+          AND status = #{status}
+    </select>
+
+    <!--
+        统计指定商家已完成订单的总金额
+        用于：商家端销售额统计
+    -->
+    <select id="sumCompletedAmount" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(total_amount), 0) FROM orders
+        WHERE merchant_id = #{merchantId}
+          AND status = 3
+    </select>
+
+    <!--
+        统计指定商家已完成订单的总售出菜品数量
+        关联 order_item 表，只统计已完成订单
+    -->
+    <select id="sumCompletedDishCount" resultType="int">
+        SELECT IFNULL(SUM(oi.quantity), 0)
+        FROM order_item oi
+                 INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.merchant_id = #{merchantId}
+          AND o.status = 3
+    </select>
+
+
+    <!-- 商家和订单状态 -->
+    <!--<select id="selectByMerchantAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE merchant_id = #{merchantId}
+        <if test="statusList != null and statusList.size() > 0">
+            AND status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+    </select>-->
+
+    <!-- 用户端：分页查询自己的订单 -->
+    <select id="listUserOrdersWithPage" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE user_id = #{userId}
+        <if test="statusList != null and statusList.size() > 0">
+            AND status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 用户端：统计自己的订单总数 -->
+    <select id="countUserOrders" resultType="long">
+        SELECT COUNT(*) FROM orders
+        WHERE user_id = #{userId}
+        <if test="statusList != null and statusList.size() > 0">
+            AND status IN
+            <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+    </select>
+
+
+    <!-- 最近30天每日营业额趋势（已完成订单 status=3） -->
+    <!-- 使用 a + b*32 替代位运算 a + (b << 5)，避免 XML 解析报错 -->
+    <select id="getDailySalesLast30Days" resultType="com.example.takeouttry.DTO.DailySalesDTO">
+        SELECT
+            DATE_FORMAT(d.date, '%m/%d') AS saleDate,
+            COALESCE(SUM(o.total_amount), 0) AS amount
+        FROM (
+                 SELECT CURDATE() - INTERVAL (a.a + b.a * 32) DAY AS date
+                 FROM (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+                       UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7
+                       UNION ALL SELECT 8 UNION ALL SELECT 9) a
+                          CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3
+                                      UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7
+                                      UNION ALL SELECT 8 UNION ALL SELECT 9) b
+                 WHERE CURDATE() - INTERVAL (a.a + b.a * 32) DAY >= CURDATE() - INTERVAL 29 DAY
+             ) d
+                 LEFT JOIN orders o
+                           ON DATE(o.create_time) = d.date
+                               AND o.merchant_id = #{merchantId}
+                               AND o.status = 3
+        GROUP BY d.date
+        ORDER BY d.date ASC;
+    </select>
+
+
+</mapper>

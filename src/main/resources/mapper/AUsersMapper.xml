@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.AUsersMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.User">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="phone" column="phone" />
+        <result property="role" column="role" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+
+
+    <insert id="addUser" parameterType="com.example.takeouttry.entity.User"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO a_users
+
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">username,</if>
+            <if test="password != null">password,</if>
+            phone,
+            <if test="role != null">role,</if>
+            create_time,
+            update_time
+        </trim>
+
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="username != null">#{username},</if>
+            <if test="password != null">#{password},</if>
+            #{phone},
+            <if test="role != null">#{role},</if>
+            NOW(),
+            NOW()
+        </trim>
+    </insert>
+
+
+
+    <update id="updateUser" parameterType="com.example.takeouttry.entity.User">
+        UPDATE a_users
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUser" parameterType="java.lang.Long">
+        DELETE FROM a_users
+        WHERE id = #{id}
+    </delete>
+
+
+    <select id="selectAllUsers" resultType="com.example.takeouttry.entity.User">
+        SELECT * FROM a_users
+    </select>
+
+    <select id="selectUserById" resultType="com.example.takeouttry.entity.User">
+        SELECT * FROM a_users
+        WHERE id = #{id}
+    </select>
+
+    <select id="existsByUsername" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM a_users
+        WHERE username = #{username}
+    </select>
+
+    <select id="existsByPhone" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM a_users
+        WHERE phone = #{phone}
+    </select>
+
+    <select id="selectUsersByCondition" resultType="com.example.takeouttry.entity.User">
+        SELECT
+        id,
+        username,
+        role,
+        create_time,
+        update_time
+        FROM a_users
+
+        <where>
+            <!-- 精确匹配 ID（一般用于单条查询，但保留以防万一） -->
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+
+            <!-- 用户名 模糊查询（前后都模糊） -->
+            <if test="username != null and username.trim() != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+
+            <!-- 手机号 模糊查询（更常用） -->
+
+
+            <!-- 角色 精确匹配 -->
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+
+            <!-- 创建时间范围 - 开始 -->
+            <if test="createTimeStart != null">
+                <![CDATA[ AND create_time >= #{createTimeStart} ]]>
+            </if>
+
+            <!-- 创建时间范围 - 结束 -->
+            <if test="createTimeEnd != null">
+                <![CDATA[ AND create_time <= #{createTimeEnd} ]]>
+            </if>
+
+            <!-- 如果以后加了 updateTime 范围，也可以类似写 -->
+            <!--
+            <if test="updateTimeStart != null">
+                <![CDATA[ AND update_time >= #{updateTimeStart} ]]>
+            </if>
+            <if test="updateTimeEnd != null">
+                <![CDATA[ AND update_time <= #{updateTimeEnd} ]]>
+            </if>
+            -->
+        </where>
+
+        <!-- 排序（可以以后再做动态排序） -->
+        ORDER BY create_time DESC
+
+        <!-- 如果后面要加分页，这里可以预留位置 -->
+        <!--
+        <if test="pageNum != null and pageSize != null">
+            LIMIT #{pageSize} OFFSET #{offset}
+        </if>
+        -->
+    </select>
+
+    <select id="findByUsername" resultType="com.example.takeouttry.entity.User">
+        SELECT
+            id,
+            username,
+            password,
+            phone,
+            role,
+            create_time,
+            update_time
+        FROM a_users
+        WHERE username = #{username}
+    </select>
+
+
+    <!-- 新增：根据用户名查询用户ID（只返回 id） -->
+    <select id="findIdByUsername" parameterType="string" resultType="long">
+        SELECT id FROM a_users WHERE username = #{username}
+    </select>
+
+
+</mapper>

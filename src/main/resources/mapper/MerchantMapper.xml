@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.MerchantMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Merchant">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="name" column="name" />
+        <result property="address" column="address" />
+        <result property="phone" column="phone" />
+        <result property="businessHours" column="business_hours" />
+        <result property="logo" column="logo" />
+        <!--<result property="description" column="description" />-->
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+
+        <!-- 如果你的 Merchant 实体有 sales 字段，可以加上 -->
+        <!-- <result property="sales" column="sales" /> -->
+    </resultMap>
+
+    <!-- 新增商家 -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.Merchant" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO merchant (
+            user_id, name, address, phone, business_hours, logo, status, create_time, update_time
+        ) VALUES (
+                     #{userId}, #{name}, #{address}, #{phone}, #{businessHours}, #{logo}, #{status},
+                     #{createTime}, #{updateTime}
+                 )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM merchant WHERE id = #{id}
+    </select>
+
+    <!-- 根据user_id查询 -->
+    <select id="selectByUserId" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM merchant WHERE user_id = #{userId}
+    </select>
+
+    <!-- 更新商家信息（动态SQL，防止空值覆盖） -->
+    <update id="updateById" parameterType="com.example.takeouttry.entity.Merchant">
+        UPDATE merchant
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="businessHours != null">business_hours = #{businessHours},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <!--<if test="description != null">description = #{description},</if>-->
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM merchant WHERE id = #{id}
+    </delete>
+
+    <!-- 新增：商家列表分页查询（支持关键词模糊搜索 + 状态筛选） -->
+    <select id="listMerchantsWithPage" resultMap="BaseResultMap">
+        SELECT * FROM merchant
+        <where>
+            <!-- 注释掉 status 筛选，显示所有商家 -->
+            <!-- <if test="status != null"> AND status = #{status} </if> -->
+
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE CONCAT('%', #{keyword}, '%')
+                OR address LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计商家总数（同样不按 status 筛选） -->
+    <select id="countMerchants" resultType="long">
+        SELECT COUNT(*) FROM merchant
+        <where>
+            <!-- 注释掉 status 筛选 -->
+            <!-- <if test="status != null"> AND status = #{status} </if> -->
+
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE CONCAT('%', #{keyword}, '%')
+                OR address LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

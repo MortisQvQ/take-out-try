@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.CategoryMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Category">
+        <id property="id" column="id" />
+        <result property="merchantId" column="merchant_id" />
+        <result property="name" column="name" />
+        <result property="sort" column="sort" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <!-- 新增分类（全字段） -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO category (
+            merchant_id, name, sort, create_time, update_time
+        ) VALUES (
+                     #{merchantId}, #{name}, #{sort}, #{createTime}, #{updateTime}
+                 )
+    </insert>
+
+    <!-- 新增分类（动态，可选字段） -->
+    <insert id="insertSelective" parameterType="com.example.takeouttry.entity.Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO category
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null">merchant_id,</if>
+            <if test="name != null">name,</if>
+            <if test="sort != null">sort,</if>
+            create_time,
+            update_time
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null">#{merchantId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="sort != null">#{sort},</if>
+            #{createTime},
+            #{updateTime}
+        </trim>
+    </insert>
+
+    <!-- 根据主键查询 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM category WHERE id = #{id}
+    </select>
+
+    <!-- 根据商家ID查询所有分类（按 sort 升序 + 创建时间降序） -->
+    <select id="selectByMerchantId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM category
+        WHERE merchant_id = #{merchantId}
+        ORDER BY sort ASC, create_time DESC
+    </select>
+
+    <!-- 根据多个 id，一次性查询多个 Category -->
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT * FROM category
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 根据主键更新（全字段） -->
+    <update id="updateByPrimaryKey" parameterType="com.example.takeouttry.entity.Category">
+        UPDATE category
+        SET merchant_id = #{merchantId},
+            name = #{name},
+            sort = #{sort},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据主键更新（动态，可选字段） -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.takeouttry.entity.Category">
+        UPDATE category
+        <set>
+            <if test="merchantId != null">merchant_id = #{merchantId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据主键删除 -->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM category WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.OrderItemMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.OrderItem">
+        <id property="id" column="id" />
+        <result property="orderId" column="order_id" />
+        <result property="dishId" column="dish_id" />
+        <result property="dishName" column="dish_name" />
+        <result property="price" column="price" />
+        <result property="quantity" column="quantity" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <!-- 新增单条订单明细 -->
+    <insert id="insert" parameterType="com.example.takeouttry.entity.OrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_item (
+            order_id, dish_id, dish_name, price, quantity, create_time
+        ) VALUES (
+                     #{orderId}, #{dishId}, #{dishName}, #{price}, #{quantity}, #{createTime}
+                 )
+    </insert>
+
+    <!-- 批量新增订单明细 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO order_item (
+        order_id, dish_id, dish_name, price, quantity, create_time
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.orderId}, #{item.dishId}, #{item.dishName}, #{item.price},
+            #{item.quantity}, #{item.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 根据ID查询单条明细 -->
+    <select id="selectById" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM order_item WHERE id = #{id}
+    </select>
+
+    <!-- 根据订单ID查询所有明细 -->
+    <select id="selectByOrderId" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM order_item
+        WHERE order_id = #{orderId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 更新订单明细（动态SQL） -->
+    <update id="updateById" parameterType="com.example.takeouttry.entity.OrderItem">
+        UPDATE order_item
+        <set>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="dishId != null">dish_id = #{dishId},</if>
+            <if test="dishName != null">dish_name = #{dishName},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            -- create_time 一般不允许修改，可根据需要注释掉或移除
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除单条明细 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM order_item WHERE id = #{id}
+    </delete>
+
+    <!-- 根据订单ID删除所有明细 -->
+    <delete id="deleteByOrderId" parameterType="long">
+        DELETE FROM order_item WHERE order_id = #{orderId}
+    </delete>
+
+
+    <!-- ==================== 统计相关 ==================== -->
+
+    <!--
+        菜品销量排行（Top N）
+        关联 orders 表，只统计已完成订单（status=3）的菜品销量
+        按菜品分组，统计总销量和总销售额，按销量降序取前 N 名
+    -->
+    <select id="selectDishSalesTop" resultType="com.example.takeouttry.DTO.DishSalesVO">
+        SELECT
+            oi.dish_id       AS dishId,
+            oi.dish_name     AS dishName,
+            SUM(oi.quantity) AS totalQuantity,
+            SUM(oi.price * oi.quantity) AS totalSalesAmount
+        FROM order_item oi
+                 INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.merchant_id = #{merchantId}
+          AND o.status = 3
+        GROUP BY oi.dish_id, oi.dish_name
+        ORDER BY totalQuantity DESC
+        LIMIT #{topN}
+    </select>
+
+</mapper>

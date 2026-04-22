@@ -1,0 +1,24 @@
+package com.example.takeouttry;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+@RestController
+public class TakeOutTryApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(TakeOutTryApplication.class, args);
+    }
+
+
+    /*
+     @GetMapping
+    public String hello() {
+        return "Hello Mortis! love you! ^_^";
+    }
+    */
+
+}
