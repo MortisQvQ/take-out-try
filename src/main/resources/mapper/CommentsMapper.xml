@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.takeouttry.mapper.CommentsMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.takeouttry.entity.Comment">
+        <id property="id" column="id" />
+        <result property="orderId" column="order_id" />
+        <result property="userId" column="user_id" />
+        <result property="merchantId" column="merchant_id" />
+        <result property="score" column="score" />
+        <result property="content" column="content" />
+        <result property="imageUrls" column="image_urls" />
+        <result property="replyContent" column="reply_content" />
+        <result property="replyTime" column="reply_time" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <resultMap id="CommentVOResultMap" type="com.example.takeouttry.DTO.CommentVO">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="avatarUrl" column="avatar_url" />
+        <result property="score" column="score" />
+        <result property="content" column="content" />
+        <result property="imageUrls" column="image_urls" />
+        <result property="replyContent" column="reply_content" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, order_id, user_id, merchant_id, score, content,
+        image_urls, reply_content, reply_time, create_time, update_time
+    </sql>
+
+    <select id="selectByMerchantId" resultMap="CommentVOResultMap">
+        SELECT
+            c.id, c.score, c.content, c.image_urls, c.reply_content, c.create_time,
+            u.username, u.avatar_url
+        FROM comments c
+                 LEFT JOIN a_users u ON c.user_id = u.id
+        WHERE c.merchant_id = #{merchantId}
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByOrderId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comments
+        WHERE order_id = #{orderId}
+        LIMIT 1
+    </select>
+
+    <select id="getAverageScoreByMerchantId" resultType="java.lang.Double">
+        SELECT IFNULL(AVG(score), 5.0)
+        FROM comments
+        WHERE merchant_id = #{merchantId}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comments
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List" />
+        from comments
+        where id = #{id}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from comments
+        where id = #{id}
+    </delete>
+
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.takeouttry.entity.Comment" useGeneratedKeys="true">
+        insert into comments (order_id, user_id, merchant_id, score, content, image_urls, create_time)
+        values (#{orderId}, #{userId}, #{merchantId}, #{score}, #{content}, #{imageUrls}, NOW())
+    </insert>
+
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.example.takeouttry.entity.Comment" useGeneratedKeys="true">
+        insert into comments
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="merchantId != null">merchant_id,</if>
+            <if test="score != null">score,</if>
+            <if test="content != null">content,</if>
+            <if test="imageUrls != null">image_urls,</if>
+            <if test="replyContent != null">reply_content,</if>
+            <if test="replyTime != null">reply_time,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="merchantId != null">#{merchantId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="content != null">#{content},</if>
+            <if test="imageUrls != null">#{imageUrls},</if>
+            <if test="replyContent != null">#{replyContent},</if>
+            <if test="replyTime != null">#{replyTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.takeouttry.entity.Comment">
+        update comments
+        <set>
+            <if test="score != null">score = #{score},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="imageUrls != null">image_urls = #{imageUrls},</if>
+            <if test="replyContent != null">reply_content = #{replyContent},</if>
+            <if test="replyTime != null">reply_time = #{replyTime},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.example.takeouttry.entity.Comment">
+        update comments
+        set
+            score = #{score},
+            content = #{content},
+            image_urls = #{imageUrls},
+            reply_content = #{replyContent},
+            reply_time = #{replyTime}
+        where id = #{id}
+    </update>
+
+</mapper>
