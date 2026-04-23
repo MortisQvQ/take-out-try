@@ -29,11 +29,6 @@
         <result property="createTime" column="create_time" />
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id, order_id, user_id, merchant_id, score, content,
-        image_urls, reply_content, reply_time, create_time, update_time
-    </sql>
-
     <select id="selectByMerchantId" resultMap="CommentVOResultMap">
         SELECT
             c.id, c.score, c.content, c.image_urls, c.reply_content, c.create_time,
@@ -45,8 +40,7 @@
     </select>
 
     <select id="selectByOrderId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List" />
-        FROM comments
+        SELECT * FROM comments
         WHERE order_id = #{orderId}
         LIMIT 1
     </select>
@@ -58,30 +52,28 @@
     </select>
 
     <select id="selectByUserId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List" />
-        FROM comments
+        SELECT * FROM comments
         WHERE user_id = #{userId}
         ORDER BY create_time DESC
     </select>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select <include refid="Base_Column_List" />
-        from comments
-        where id = #{id}
+        SELECT * FROM comments
+        WHERE id = #{id}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        delete from comments
-        where id = #{id}
+        DELETE FROM comments
+        WHERE id = #{id}
     </delete>
 
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.takeouttry.entity.Comment" useGeneratedKeys="true">
-        insert into comments (order_id, user_id, merchant_id, score, content, image_urls, create_time)
-        values (#{orderId}, #{userId}, #{merchantId}, #{score}, #{content}, #{imageUrls}, NOW())
+        INSERT INTO comments (order_id, user_id, merchant_id, score, content, image_urls, create_time)
+        VALUES (#{orderId}, #{userId}, #{merchantId}, #{score}, #{content}, #{imageUrls}, NOW())
     </insert>
 
     <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.example.takeouttry.entity.Comment" useGeneratedKeys="true">
-        insert into comments
+        INSERT INTO comments
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="orderId != null">order_id,</if>
             <if test="userId != null">user_id,</if>
@@ -107,26 +99,28 @@
     </insert>
 
     <update id="updateByPrimaryKeySelective" parameterType="com.example.takeouttry.entity.Comment">
-        update comments
+        UPDATE comments
         <set>
             <if test="score != null">score = #{score},</if>
             <if test="content != null">content = #{content},</if>
             <if test="imageUrls != null">image_urls = #{imageUrls},</if>
             <if test="replyContent != null">reply_content = #{replyContent},</if>
             <if test="replyTime != null">reply_time = #{replyTime},</if>
+            update_time = NOW()
         </set>
-        where id = #{id}
+        WHERE id = #{id}
     </update>
 
     <update id="updateByPrimaryKey" parameterType="com.example.takeouttry.entity.Comment">
-        update comments
-        set
+        UPDATE comments
+        SET
             score = #{score},
             content = #{content},
             image_urls = #{imageUrls},
             reply_content = #{replyContent},
-            reply_time = #{replyTime}
-        where id = #{id}
+            reply_time = #{replyTime},
+            update_time = NOW()
+        WHERE id = #{id}
     </update>
 
 </mapper>
