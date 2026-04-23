@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -112,6 +113,30 @@ public interface OrdersMapper {
      * @return 每天的日期和金额
      */
     List<DailySalesDTO> getDailySalesLast30Days(@Param("merchantId") Long merchantId);
+
+    // 根据时间区间统计已完成订单数
+    Integer countCompletedInRange(@Param("merchantId") Long merchantId,
+                                  @Param("begin") LocalDateTime begin,
+                                  @Param("end") LocalDateTime end);
+
+    // 根据时间区间统计营业额
+    BigDecimal sumAmountInRange(@Param("merchantId") Long merchantId,
+                                @Param("begin") LocalDateTime begin,
+                                @Param("end") LocalDateTime end);
+
+    // 根据时间区间统计菜品售出数
+    Integer sumDishCountInRange(@Param("merchantId") Long merchantId,
+                                @Param("begin") LocalDateTime begin,
+                                @Param("end") LocalDateTime end);
+
+
+    /**
+     * 更新订单的评价状态
+     * @param orderId 订单ID
+     * @param hasComment 评价状态：0=未评价，1=已评价
+     * @return 影响行数
+     */
+    int updateHasCommentStatus(@Param("id") Long orderId, @Param("hasComment") Integer hasComment);
 
 
 }

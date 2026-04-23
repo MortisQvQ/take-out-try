@@ -7,6 +7,7 @@ import com.example.takeouttry.entity.Dish;
 import com.example.takeouttry.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -77,6 +78,27 @@ public class DishController {
 
         PageResult<DishVO> result = dishService.pageMyDishesWithCategory(pageNum, pageSize, name);
         return Result.success(result);
+    }
+
+
+    /**
+     * 菜品图片上传
+     * 路径：PUT /merchant/dishes/{id}/image
+     */
+    @PutMapping("/{id}/image")
+    public Result<String> uploadDishImage(@PathVariable Long id,
+                                          @RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return Result.error("请选择要上传的图片");
+        }
+
+        try {
+            // 调用 service 层处理
+            String imageUrl = dishService.uploadDishImage(id, file);
+            return Result.success(imageUrl, "菜品图片上传成功");
+        } catch (Exception e) {
+            return Result.error("上传失败：" + e.getMessage());
+        }
     }
 
 }

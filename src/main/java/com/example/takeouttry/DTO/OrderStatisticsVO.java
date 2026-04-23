@@ -61,4 +61,19 @@ public class OrderStatisticsVO {
      * 最近30天每日营业额（y轴）
      */
     private List<BigDecimal> trendAmounts;
+
+    /**
+     * 已完成订单数趋势（百分比，正数为上升，负数为下降）
+     */
+    private Double completedTrend;
+
+    /**
+     * 营业额趋势百分比
+     */
+    private Double amountTrend;
+
+    /**
+     * 售出菜品趋势百分比
+     */
+    private Double dishCountTrend;
 }

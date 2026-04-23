@@ -5,7 +5,7 @@ import com.example.takeouttry.DTO.MerchantDTO.MerchantResponse;
 import com.example.takeouttry.DTO.MerchantDTO.MerchantWithDishesVO;
 import com.example.takeouttry.DTO.PageResult;
 import com.example.takeouttry.entity.Dish;
-import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -73,5 +73,14 @@ public interface DishService {
      * 获取商家基本信息（公开）
      */
     MerchantResponse getMerchantInfo(Long merchantId);
+
+
+    /**
+     * 商家上传/更新菜品图片
+     * @param dishId 菜品ID
+     * @param file 图片文件
+     * @return 返回可访问的 URL 路径
+     */
+    String uploadDishImage(Long dishId, MultipartFile file);
 
 }

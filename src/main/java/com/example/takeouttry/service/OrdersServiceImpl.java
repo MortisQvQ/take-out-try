@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 //import java.util.Collections;
 import java.util.Collections;
@@ -358,6 +361,30 @@ public class OrdersServiceImpl implements OrdersService {
             trendAmounts.add(ds.getAmount() != null ? ds.getAmount() : BigDecimal.ZERO);
         }
 
+        // 1. 准备时间区间
+        LocalDateTime now = LocalDateTime.now();
+        // 本月1号 00:00:00
+        LocalDateTime thisMonthStart = now.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
+        // 上月1号 00:00:00
+        LocalDateTime lastMonthStart = thisMonthStart.minusMonths(1);
+        // 上月今天同一时刻
+        LocalDateTime lastMonthSameTime = now.minusMonths(1);
+
+        // 2. 获取本月至今的实时数据（用于计算百分比，保证对比公平）
+        BigDecimal thisMonthAmountRealtime = ordersMapper.sumAmountInRange(merchantId, thisMonthStart, now);
+        int thisMonthOrdersRealtime = ordersMapper.countCompletedInRange(merchantId, thisMonthStart, now);
+        int thisMonthDishesRealtime = ordersMapper.sumDishCountInRange(merchantId, thisMonthStart, now);
+
+        // 3. 获取上月同期数据
+        BigDecimal lastMonthAmount = ordersMapper.sumAmountInRange(merchantId, lastMonthStart, lastMonthSameTime);
+        int lastMonthOrders = ordersMapper.countCompletedInRange(merchantId, lastMonthStart, lastMonthSameTime);
+        int lastMonthDishes = ordersMapper.sumDishCountInRange(merchantId, lastMonthStart, lastMonthSameTime);
+
+        // 4. 计算趋势并填入 VO
+        Double amountTrend = calculateTrend(thisMonthAmountRealtime, lastMonthAmount);
+        Double completedTrend = calculateTrend(BigDecimal.valueOf(thisMonthOrdersRealtime), BigDecimal.valueOf(lastMonthOrders));
+        Double dishCountTrend = calculateTrend(BigDecimal.valueOf(thisMonthDishesRealtime), BigDecimal.valueOf(lastMonthDishes));
+
         // 返回完整统计 + 趋势数据
         return OrderStatisticsVO.builder()
                 .totalCompleted(totalCompleted)
@@ -369,7 +396,25 @@ public class OrdersServiceImpl implements OrdersService {
                 .cancelled(cancelled)
                 .trendDates(trendDates)
                 .trendAmounts(trendAmounts)
+
+                .amountTrend(amountTrend)
+                .completedTrend(completedTrend)
+                .dishCountTrend(dishCountTrend)
                 .build();
+    }
+
+    /**
+     * 趋势计算私有方法（保持严谨）
+     */
+    private Double calculateTrend(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.compareTo(BigDecimal.ZERO) == 0) {
+            return (current != null && current.compareTo(BigDecimal.ZERO) > 0) ? 100.0 : 0.0;
+        }
+        if (current == null) current = BigDecimal.ZERO;
+        return current.subtract(previous)
+                .divide(previous, 4, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal(100))
+                .doubleValue();
     }
 
     /**

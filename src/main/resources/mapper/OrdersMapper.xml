@@ -200,5 +200,39 @@
         ORDER BY d.date ASC;
     </select>
 
+    <!-- 完成订单数 -->
+    <select id="countCompletedInRange" resultType="int">
+        SELECT COUNT(*) FROM orders
+        WHERE merchant_id = #{merchantId}
+          AND status = 3
+          AND create_time BETWEEN #{begin} AND #{end}
+    </select>
+
+    <!-- 营业额 -->
+    <select id="sumAmountInRange" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(total_amount), 0) FROM orders
+        WHERE merchant_id = #{merchantId}
+          AND status = 3
+          AND create_time BETWEEN #{begin} AND #{end}
+    </select>
+
+    <!-- 卖出总数量 -->
+    <select id="sumDishCountInRange" resultType="int">
+        SELECT IFNULL(SUM(oi.quantity), 0)
+        FROM order_item oi
+                 INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.merchant_id = #{merchantId}
+          AND o.status = 3
+          AND o.create_time BETWEEN #{begin} AND #{end}
+    </select>
+
+
+    <update id="updateHasCommentStatus">
+        update orders
+        set has_comment = #{hasComment},
+        update_time = NOW()
+        where id = #{id}
+    </update>
+
 
 </mapper>

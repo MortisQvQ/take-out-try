@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/merchant/register/**").permitAll()
                         .requestMatchers("/dishes/merchant/**").permitAll()         // 用户浏览商家和菜品
                         .requestMatchers("/uploads/**").permitAll()                 // 静态图片资源（Logo、菜品图等）
+                        .requestMatchers("/comments/**").permitAll()
                         .requestMatchers("/hello", "/api/test", "/error").permitAll()
 
                         // ====================== 需要登录的接口 ======================

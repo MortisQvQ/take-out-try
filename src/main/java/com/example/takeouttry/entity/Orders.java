@@ -26,6 +26,8 @@ public class Orders {
 
     private String remark;          // 用户备注
 
+    private Integer hasComment;     //是否已评价：0=未评价，1=已评价
+
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

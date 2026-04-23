@@ -16,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -405,5 +407,56 @@ public class DishServiceImpl implements DishService {
         response.setStatus(merchant.getStatus() == 1);   // boolean 类型
 
         return response;
+    }
+
+    /**
+     * 菜品图片上传实现 (参考 uploadAvatar 风格)
+     */
+    @Override
+    @Transactional
+    public String uploadDishImage(Long dishId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("请选择要上传的图片文件");
+        }
+
+        // 权限校验
+        Long merchantId = getCurrentMerchantId();
+        Dish dish = dishMapper.selectByPrimaryKey(dishId);
+        if (dish == null || !dish.getMerchantId().equals(merchantId)) {
+            throw new RuntimeException("菜品不存在或无权限修改");
+        }
+
+        try {
+            // 1. 定义保存目录
+            String projectRoot = System.getProperty("user.dir");
+            String uploadDirPath = projectRoot + "/src/main/resources/static/uploads/dishes/";
+
+            File uploadDir = new File(uploadDirPath);
+            if (!uploadDir.exists()) {
+                if (!uploadDir.mkdirs()) {
+                    throw new RuntimeException("系统无法创建图片存储目录");
+                }
+            }
+
+            // 2. 覆盖模式文件名
+            String filename = "dish_" + dishId + ".jpg";
+
+            // 3. 保存物理文件
+            File destFile = new File(uploadDirPath + filename);
+            file.transferTo(destFile);
+
+            // 4. 更新数据库路径
+            String imageUrl = "/uploads/dishes/" + filename;
+            dish.setImage(imageUrl);
+            dish.setUpdateTime(LocalDateTime.now());
+            dishMapper.updateByPrimaryKeySelective(dish);
+
+            System.out.println("菜品图片上传成功！ID: " + dishId + "，路径: " + imageUrl);
+            return imageUrl;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("图片上传失败：" + e.getMessage());
+        }
     }
 }
