@@ -7,7 +7,6 @@ import com.example.takeouttry.DTO.PageResult;
 import com.example.takeouttry.DTO.Result;
 import com.example.takeouttry.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -88,6 +87,18 @@ public class DishPublicController {
         }
 
         return Result.success(info);
+    }
+
+    /**
+     * 新增：获取单个菜品详细信息（公开接口）
+     * 用于首页推荐位的图片和详情补全
+     */
+    @GetMapping("/{id}")
+    public Result<DishVO> getDishDetail(@PathVariable Long id) {
+        // 这里的 DishVO 必须包含 image 字段
+        // 逻辑：直接调用 mapper.selectByPrimaryKey(id) 并转为 VO 即可
+        DishVO dish = dishService.getPublicDishById(id);
+        return dish != null ? Result.success(dish) : Result.error("菜品不存在");
     }
 
 }

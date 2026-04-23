@@ -459,4 +459,22 @@ public class DishServiceImpl implements DishService {
             throw new RuntimeException("图片上传失败：" + e.getMessage());
         }
     }
+
+    @Override
+    public DishVO getPublicDishById(Long id) {
+        // 1. 调用你现有的 Mapper，它会查出 id, name, price, image 等所有字段
+        Dish dish = dishMapper.selectByPrimaryKey(id);
+
+        if (dish == null) return null;
+
+        // 2. 手动转换成 DishVO（哪怕没分类名也行，首页推荐位只要图片和标题）
+        return DishVO.builder()
+                .id(dish.getId())
+                .name(dish.getName())
+                .price(dish.getPrice())
+                .image(dish.getImage()) // 图片就在这里！
+                .description(dish.getDescription())
+                .categoryId(dish.getCategoryId())
+                .build();
+    }
 }

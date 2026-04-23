@@ -83,4 +83,7 @@ public interface DishService {
      */
     String uploadDishImage(Long dishId, MultipartFile file);
 
+    // 用于首页推荐位根据 ID 获取菜品详情（包含图片）
+    DishVO getPublicDishById(Long id);
+
 }
