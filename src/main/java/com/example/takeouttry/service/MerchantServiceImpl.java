@@ -158,12 +158,12 @@ public class MerchantServiceImpl implements MerchantService {
                         + " | 影响行数: " + updateRows);
 
                 if (updateRows > 0) {
-                    System.out.println("✅ Logo路径已成功保存到数据库！");
+                    System.out.println(" Logo路径已成功保存到数据库！");
                 } else {
-                    System.out.println("❌ 更新失败，数据库没有发生变化！");
+                    System.out.println(" 更新失败，数据库没有发生变化！");
                 }
             } else {
-                System.out.println("❌ 未找到商家ID = " + merchantId + " 的记录");
+                System.out.println(" 未找到商家ID = " + merchantId + " 的记录");
             }
 
             return logoUrl;

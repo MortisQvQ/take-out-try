@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        System.out.println("✅ SecurityConfig 构造器注入 JwtAuthenticationFilter 成功");
+        System.out.println(" SecurityConfig 构造器注入 JwtAuthenticationFilter 成功");
     }
 
     @Bean
