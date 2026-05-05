@@ -1,9 +1,6 @@
 package com.example.takeouttry.service;
 
-import com.example.takeouttry.DTO.DishSalesVO;
-import com.example.takeouttry.DTO.OrderStatisticsVO;
-import com.example.takeouttry.DTO.OrderVO;
-import com.example.takeouttry.DTO.PageResult;
+import com.example.takeouttry.DTO.*;
 import com.example.takeouttry.entity.Orders;
 
 import java.util.List;
@@ -90,6 +87,13 @@ public interface OrdersService {
     List<DishSalesVO> getDishSalesTop(Long merchantUserId, int topN);
 
     PageResult<OrderVO> pageUserOrders(Long userId, int pageNum, int pageSize, List<Integer> statusList);
+
+    /**
+     * 获取指定用户的累计订单数和累计消费总额
+     * @param userId 用户ID
+     * @return 统计数据
+     */
+    UserOrderStatisticsVO getUserOrderStatistics(Long userId);
 
 
 }

@@ -161,6 +161,12 @@
           AND selected = #{selected}
     </delete>
 
+    <select id="sumQuantityByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(quantity), 0)
+        FROM cart
+        WHERE user_id = #{userId}
+    </select>
+
 
 
 </mapper>

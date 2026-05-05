@@ -241,4 +241,23 @@ public class OrdersController {
 
         return Result.success(result);
     }
+
+    /**
+     * 获取当前登录用户的累计订单数和累计消费金额（用于个人中心）
+     */
+    @GetMapping("/user/statistics")
+    public Result<UserOrderStatisticsVO> getUserOrderStatistics(
+            @AuthenticationPrincipal JwtUser user) {
+
+        if (user == null) {
+            return Result.error("请先登录", 401);
+        }
+
+        try {
+            UserOrderStatisticsVO stats = ordersService.getUserOrderStatistics(user.getId());
+            return Result.success(stats);
+        } catch (Exception e) {
+            return Result.error("获取个人消费统计失败：" + e.getMessage(), 500);
+        }
+    }
 }

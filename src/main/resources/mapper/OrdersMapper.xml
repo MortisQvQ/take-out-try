@@ -234,5 +234,16 @@
         where id = #{id}
     </update>
 
+    <select id="selectStatisticsByUserId" resultType="com.example.takeouttry.DTO.UserOrderStatisticsVO">
+        SELECT
+            COUNT(id) AS totalOrderCount,
+            COALESCE(SUM(total_amount), 0) AS totalExpenditure
+        FROM
+            orders
+        WHERE
+            user_id = #{userId}
+          AND status IN (1, 2, 3)
+    </select>
+
 
 </mapper>

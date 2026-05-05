@@ -492,6 +492,33 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
 
+    /**
+     * 【新加功能】获取普通用户的累计订单数和累计消费金额
+     */
+    @Override
+    public UserOrderStatisticsVO getUserOrderStatistics(Long userId) {
+        if (userId == null) {
+            return new UserOrderStatisticsVO(0, BigDecimal.ZERO);
+        }
+
+        // 1. 调用 Mapper 统计当前用户的有效订单（状态为 1, 2, 3）
+        UserOrderStatisticsVO statistics = ordersMapper.selectStatisticsByUserId(userId);
+
+        // 2. 防御性空值处理
+        if (statistics == null) {
+            return new UserOrderStatisticsVO(0, BigDecimal.ZERO);
+        }
+        if (statistics.getTotalOrderCount() == null) {
+            statistics.setTotalOrderCount(0);
+        }
+        if (statistics.getTotalExpenditure() == null) {
+            statistics.setTotalExpenditure(BigDecimal.ZERO);
+        }
+
+        return statistics;
+    }
+
+
     /*
      * 商家端订单列表分页聚合查询（瀑布流核心接口 - 分页版）
      * 遵循 Dish 分页思路：计算偏移量 + 总数统计 + 数据聚合

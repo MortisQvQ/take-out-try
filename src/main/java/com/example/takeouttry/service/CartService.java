@@ -54,4 +54,11 @@ public interface CartService {
      * @return 汇总信息
      */
     CartSummaryDTO getCartSummary(Long userId);
+
+    /**
+     * 获取用户购物车所有商品的总数量（包含未选中的商品）
+     * @param userId 用户ID
+     * @return 购物车中所有商品的总件数
+     */
+    Integer getCartTotalCount(Long userId);
 }

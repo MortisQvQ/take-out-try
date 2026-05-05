@@ -157,7 +157,6 @@ public class CartController {
 
     /**
      * 可选扩展：设置某商家所有商品的选中状态（全选/全不选）
-     * - 如果需要这个功能，在 CartServiceImpl 加一个方法实现
      *   cartMapper.updateSelectedByUserAndMerchant(userId, merchantId, selected);
      */
     @PutMapping("/select")
@@ -178,8 +177,22 @@ public class CartController {
             return Result.error("选中状态只能为0或1", 400);
         }
 
-        // cartService.selectAllByMerchant(user.getId(), merchantId, selected);
-        // 目前 ServiceImpl 没有这个方法，先返回提示
         return Result.success(null, "功能待实现，可在 CartServiceImpl 中添加 updateSelectedByUserAndMerchant 调用");
+    }
+
+    /**
+     * 获取购物车所有商品的总数量（包含未选中的商品）
+     */
+    @GetMapping("/total-count")
+    public Result<Integer> getCartTotalCount(@AuthenticationPrincipal JwtUser user) {
+        if (user == null) {
+            return Result.error("请先登录", 401);
+        }
+        try {
+            Integer totalCount = cartService.getCartTotalCount(user.getId());
+            return Result.success(totalCount);
+        } catch (Exception e) {
+            return Result.error("获取购物车商品总数失败：" + e.getMessage(), 500);
+        }
     }
 }

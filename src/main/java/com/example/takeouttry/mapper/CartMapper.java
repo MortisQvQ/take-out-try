@@ -61,4 +61,6 @@ public interface CartMapper {
             @Param("selected") Integer selected
     );
 
+    Integer sumQuantityByUserId(@Param("userId") Long userId);
+
 }

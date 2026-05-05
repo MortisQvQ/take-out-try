@@ -1,6 +1,7 @@
 package com.example.takeouttry.mapper;
 
 import com.example.takeouttry.DTO.DailySalesDTO;
+import com.example.takeouttry.DTO.UserOrderStatisticsVO;
 import com.example.takeouttry.entity.Orders;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -137,6 +138,11 @@ public interface OrdersMapper {
      * @return 影响行数
      */
     int updateHasCommentStatus(@Param("id") Long orderId, @Param("hasComment") Integer hasComment);
+
+    /**
+     * 聚合查询用户的订单数及累计消费额
+     */
+    UserOrderStatisticsVO selectStatisticsByUserId(@Param("userId") Long userId);
 
 
 }
