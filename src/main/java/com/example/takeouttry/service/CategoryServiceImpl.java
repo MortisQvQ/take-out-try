@@ -112,8 +112,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryMapper.deleteByPrimaryKey(categoryId);
 
-        // 可选：删除分类后，把关联的菜品 category_id 设为 null 或默认分类
-        //dishMapper.updateCategoryIdToNull(categoryId); // 如果需要可以加
+
 
     }
 

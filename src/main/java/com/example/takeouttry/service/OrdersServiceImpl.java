@@ -41,7 +41,7 @@ public class OrdersServiceImpl implements OrdersService {
         this.orderItemMapper = orderItemMapper;
         this.cartMapper = cartMapper;
         this.merchantMapper = merchantMapper;
-        // 单机环境，workerId 和 datacenterId 写死即可，无分布式冲突
+        // 单机环境，workerId 和 datacenterId 写死无分布式冲突
         this.idWorker = new SnowflakeIdWorker(1, 1);
     }
 
@@ -350,7 +350,7 @@ public class OrdersServiceImpl implements OrdersService {
         BigDecimal totalAmount = ordersMapper.sumCompletedAmount(merchantId);
         int totalDishCount = ordersMapper.sumCompletedDishCount(merchantId);
 
-        // ==================== 新增：最近30天营业额趋势 ====================
+        // ==================== 最近30天营业额趋势 ====================
         List<DailySalesDTO> dailyList = ordersMapper.getDailySalesLast30Days(merchantId);
 
         List<String> trendDates = new ArrayList<>();

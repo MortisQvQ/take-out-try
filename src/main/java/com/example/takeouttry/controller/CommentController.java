@@ -29,19 +29,19 @@ public class CommentController {
             @AuthenticationPrincipal JwtUser user,
             @RequestBody Comment comment) {
 
-        // 1. 登录校验
+        // 登录校验
         if (user == null) {
             log.warn("评价提交失败：未获取到当前用户信息");
             return Result.error("登录已失效，请重新登录", 401);
         }
 
-        // 2. 自动填充从 Token 中解析出来的用户 ID
-        // 对应你 JwtUser 中的 private final Long id;
+        // 自动填充从 Token 中解析出来的用户 ID
+        // 对应 JwtUser 中的 private final Long id;
         comment.setUserId(user.getId());
 
         log.info("用户 {} (ID: {}) 提交了订单 {} 的评价", user.getUsername(), user.getId(), comment.getOrderId());
 
-        // 3. 执行业务逻辑
+        // 执行业务逻辑
         try {
             boolean success = commentService.postComment(comment);
             if (success) {

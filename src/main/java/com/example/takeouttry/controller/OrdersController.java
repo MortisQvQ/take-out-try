@@ -158,7 +158,7 @@ public class OrdersController {
         return Result.success(result);
     }
 
-    // ==================== 统计相关接口（已直接整合） ====================
+    // 统计相关接口
 
     /**
      * 商家端：订单统计概览

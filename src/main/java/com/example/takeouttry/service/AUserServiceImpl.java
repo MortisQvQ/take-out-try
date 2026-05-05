@@ -60,7 +60,6 @@ public class AUserServiceImpl implements AUserService {
         );
     }
 
-    // ====================== 你原来的所有业务方法（完整保留） ======================
     @Override
     public List<User> listUsers() {
         return ausersMapper.selectAllUsers();
@@ -197,18 +196,18 @@ public class AUserServiceImpl implements AUserService {
                 System.out.println("创建头像上传目录成功: " + uploadDirPath);
             }
 
-            // ==================== 2. 使用固定文件名（覆盖模式） ====================
+            // ====================  使用固定文件名（覆盖模式） ====================
             // 一个用户只保留一个头像文件，新上传会直接覆盖旧的
             String filename = "avatar_" + userId + ".jpg";
 
-            // ==================== 3. 保存文件（覆盖同名文件） ====================
+            // ==================== 保存文件（覆盖同名文件） ====================
             File destFile = new File(uploadDirPath + filename);
             file.transferTo(destFile);
 
-            // ==================== 4. 返回可访问的URL路径 ====================
+            // ====================  返回可访问的URL路径 ====================
             String avatarUrl = "/uploads/avatars/" + filename;
 
-            // ==================== 5. 更新数据库 ====================
+            // ====================  更新数据库 ====================
             User user = ausersMapper.selectUserById(userId);
             if (user != null) {
                 user.setAvatarUrl(avatarUrl);

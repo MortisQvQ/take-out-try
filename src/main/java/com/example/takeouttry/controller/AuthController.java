@@ -64,16 +64,12 @@ public class AuthController {
         if (request.getPassword() == null || request.getPassword().isBlank()) {
             return Result.error("密码不能为空");
         }
-        // 这里记得补充对 type 的非空校验
-        /*if (request.getType() == null || request.getType().isBlank()) {
-            return Result.error("登录类型不能为空");
-        }*/
+
 
         try {
             String token = aUserService.login(request.getUsername(), request.getPassword(), request.getType());
             return Result.success(new LoginResponse(token), "登录成功");
         } catch (IllegalArgumentException e) {
-            // 明确返回 401，符合 RESTful 规范
             return Result.error(e.getMessage(), 401);
         } catch (Exception e) {
             e.printStackTrace();

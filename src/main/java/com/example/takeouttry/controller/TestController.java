@@ -44,7 +44,6 @@ public class TestController {
             info.put("authorities", authentication.getAuthorities());
             info.put("details", authentication.getDetails());
 
-            // ==================== 关键：查询完整用户信息（包含 avatarUrl） ====================
             if (authentication.getPrincipal() instanceof JwtUser jwtUser) {
                 Long userId = jwtUser.getId();
                 User user = aUserService.getUserById(userId);

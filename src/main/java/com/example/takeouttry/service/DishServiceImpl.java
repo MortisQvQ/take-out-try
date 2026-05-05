@@ -163,11 +163,6 @@ public class DishServiceImpl implements DishService {
                 existing.setCategoryId(dish.getCategoryId());
             }
         }
-        // 禁止修改的字段（不复制）
-        // - merchantId（永不改）
-        // - sales（销量只能系统累加，不能手动改）
-        // - createTime（创建时间永不改）
-        // - id（主键不改）
 
         // 4. 更新时间
         existing.setUpdateTime(LocalDateTime.now());

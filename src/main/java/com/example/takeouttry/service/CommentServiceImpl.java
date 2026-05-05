@@ -66,7 +66,6 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 4. 商家回复评价
-     * 风格统一：使用你习惯的字段填充和 updateByPrimaryKeySelective 方法
      */
     @Override
     @Transactional(rollbackFor = Exception.class)

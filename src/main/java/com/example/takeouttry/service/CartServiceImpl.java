@@ -215,8 +215,7 @@ public class CartServiceImpl implements CartService {
             result.add(vo);
         }
 
-        // 可选：按商家创建时间或名称排序
-        // result.sort(Comparator.comparing(CartMerchantVO::getMerchantName));
+
 
         return result;
     }
@@ -248,18 +247,10 @@ public class CartServiceImpl implements CartService {
         if (userId == null) {
             return 0;
         }
-        // 方案一：直接通过 Mapper 聚合查询（性能更优，推荐）
+
         Integer totalCount = cartMapper.sumQuantityByUserId(userId);
         return totalCount != null ? totalCount : 0;
 
-        /* // 方案二：如果你的 cartMapper 不方便加新 SQL，可以使用以下内存流统计：
-        List<Cart> carts = cartMapper.selectByUserId(userId);
-        if (carts == null || carts.isEmpty()) {
-            return 0;
-        }
-        return carts.stream()
-                .mapToInt(Cart::getQuantity)
-                .sum();
-        */
+
     }
 }

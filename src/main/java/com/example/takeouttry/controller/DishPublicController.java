@@ -95,8 +95,6 @@ public class DishPublicController {
      */
     @GetMapping("/{id}")
     public Result<DishVO> getDishDetail(@PathVariable Long id) {
-        // 这里的 DishVO 必须包含 image 字段
-        // 逻辑：直接调用 mapper.selectByPrimaryKey(id) 并转为 VO 即可
         DishVO dish = dishService.getPublicDishById(id);
         return dish != null ? Result.success(dish) : Result.error("菜品不存在");
     }
